@@ -11,6 +11,6 @@ interface PokemonService {
     @GET("/api/v2/pokemon/")
     fun getAllPokemon(): Call<PokemonList>
 
-    @GET("/api/v2/pokemon/{name}")
-    fun getPokemonDetails(@Path("name") name: String): Call<PokemonDetails>
+    @GET("/api/v2/pokemon/{nameOrId}")
+    fun getPokemonDetails(@Path("nameOrId") nameOrId: String): Call<PokemonDetails>
 }

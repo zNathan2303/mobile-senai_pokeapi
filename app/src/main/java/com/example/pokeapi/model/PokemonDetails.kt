@@ -4,14 +4,23 @@ import com.google.gson.annotations.SerializedName
 
 data class PokemonDetails (
     val name: String = "",
-    val id: String = "",
-    val sprites: PokemonSprites? = null,
+    val id: Int = 0,
+    val sprites: Sprites? = null,
     val types: List<PokemonType> = listOf()
 )
 
-data class PokemonSprites(
+data class Sprites(
+    val other: OtherSprites? = null
+)
+
+data class OtherSprites(
+    @SerializedName("official-artwork")
+    val officialArtwork: OfficialArtwork? = null
+)
+
+data class OfficialArtwork(
     @SerializedName("front_default")
-    val frontDefault: String? = null
+    val frontDefault: String = ""
 )
 
 data class PokemonType(
@@ -20,6 +29,5 @@ data class PokemonType(
 )
 
 data class Type(
-    val name: String = "",
-    val url: String = ""
+    val name: String = ""
 )
