@@ -6,7 +6,8 @@ data class PokemonDetails (
     val name: String = "",
     val id: Int = 0,
     val sprites: Sprites? = null,
-    val types: List<PokemonType> = listOf()
+    val types: List<PokemonType> = listOf(),
+    val stats: List<PokemonStat> = listOf()
 )
 
 data class Sprites(
@@ -29,5 +30,15 @@ data class PokemonType(
 )
 
 data class Type(
+    val name: String = ""
+)
+
+data class PokemonStat(
+    @SerializedName("base_stat")
+    val baseStat: Int = 0,
+    val stat: Stat? = null
+)
+
+data class Stat(
     val name: String = ""
 )
