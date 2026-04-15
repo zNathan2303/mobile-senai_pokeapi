@@ -25,7 +25,6 @@ data class OfficialArtwork(
 )
 
 data class PokemonType(
-    val slot: Int = 0,
     val type: Type? = null
 )
 

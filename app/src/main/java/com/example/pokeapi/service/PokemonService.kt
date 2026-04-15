@@ -2,15 +2,14 @@ package com.example.pokeapi.service
 
 import com.example.pokeapi.model.PokemonDetails
 import com.example.pokeapi.model.PokemonList
-import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Path
 
 interface PokemonService {
 
     @GET("/api/v2/pokemon/")
-    fun getAllPokemon(): Call<PokemonList>
+    suspend fun getAllPokemon(): PokemonList
 
     @GET("/api/v2/pokemon/{nameOrId}")
-    fun getPokemonDetails(@Path("nameOrId") nameOrId: String): Call<PokemonDetails>
+    suspend fun getPokemonDetails(@Path("nameOrId") nameOrId: String): PokemonDetails
 }

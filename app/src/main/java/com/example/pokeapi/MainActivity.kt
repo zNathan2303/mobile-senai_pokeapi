@@ -42,10 +42,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         composable(
-                            route = "pokemon-details"
-                        ) {
-                            PokemonDetailScreen(
+                            route = "pokemon-details/{id}"
+                        ) { backStackEntry ->
 
+                            val id = backStackEntry.arguments?.getString("id")
+
+                            PokemonDetailScreen(
+                                modifier = Modifier.padding(innerPadding),
+                                navController = navController,
+                                pokemonId = id ?: ""
                             )
                         }
                     }

@@ -30,6 +30,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -45,6 +46,7 @@ import com.example.pokeapi.model.PokemonDetails
 import com.example.pokeapi.model.PokemonList
 import com.example.pokeapi.model.enums.TypeColor
 import com.example.pokeapi.service.RetrofitFactory
+import kotlinx.coroutines.launch
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -67,45 +69,34 @@ fun HomeScreen(
         mutableStateOf("")
     }
 
+    val scope = rememberCoroutineScope()
+
     fun getPokemonList() {
-        RetrofitFactory()
-            .getPokemonService()
-            .getAllPokemon()
-            .enqueue(object: Callback<PokemonList> {
-                override fun onResponse(
-                    call: Call<PokemonList>,
-                    response: Response<PokemonList>
-                ) {
-                    pokemonList = response.body()!!
+        scope.launch {
+            try {
+                pokemonList = RetrofitFactory()
+                    .getPokemonService()
+                    .getAllPokemon()
 
-                    pokemonList!!.results.forEach { pokemon ->
-                        RetrofitFactory()
-                            .getPokemonService()
-                            .getPokemonDetails(pokemon.name)
-                            .enqueue(object: Callback<PokemonDetails> {
-                                override fun onResponse(
-                                    call: Call<PokemonDetails>,
-                                    response: Response<PokemonDetails>
-                                ) {
-                                    pokemons.add(response.body()!!)
-                                }
+                pokemons.clear()
 
-                                override fun onFailure(
-                                    call: Call<PokemonDetails>,
-                                    t: Throwable
-                                ) {
-                                    Log.i("Erro busca detalhes pokemon", "${t.message}")
-                                }
-                            })
+                pokemonList!!.results.forEach { pokemon ->
+                    scope.launch {
+                        try {
+                            val pokemonDetails = RetrofitFactory()
+                                .getPokemonService()
+                                .getPokemonDetails(pokemon.name)
+
+                            pokemons.add(pokemonDetails)
+                        } catch (e: Exception) {
+                            Log.i("Erro busca detalhes pokemon", "${e.message}")
+                        }
                     }
                 }
-                override fun onFailure(
-                    call: Call<PokemonList>,
-                    t: Throwable
-                ) {
-                    Log.i("Erro busca lista pokemons", "${t.message}")
-                }
-            })
+            } catch (e: Exception) {
+                Log.i("Erro busca lista pokemons", "${e.message}")
+            }
+        }
     }
 
     getPokemonList()
@@ -153,26 +144,20 @@ fun HomeScreen(
                 IconButton(
                     onClick = {
                         if (nameOrIdInSearch != "") {
-                            RetrofitFactory()
-                                .getPokemonService()
-                                .getPokemonDetails(nameOrIdInSearch)
-                                .enqueue(object: Callback<PokemonDetails> {
-                                    override fun onResponse(
-                                        call: Call<PokemonDetails>,
-                                        response: Response<PokemonDetails>
-                                    ) {
-                                        pokemons.apply {
-                                            clear()
-                                            add(response.body()!!)
-                                        }
+                            scope.launch {
+                                try {
+                                    val pokemonDetails = RetrofitFactory()
+                                        .getPokemonService()
+                                        .getPokemonDetails(nameOrIdInSearch)
+
+                                    pokemons.apply {
+                                        clear()
+                                        add(pokemonDetails)
                                     }
-                                    override fun onFailure(
-                                        call: Call<PokemonDetails>,
-                                        t: Throwable
-                                    ) {
-                                        Log.i("TESTE", "${t.message}")
-                                    }
-                                })
+                                } catch (e: Exception) {
+                                    Log.i("TESTE", "${e.message}")
+                                }
+                            }
                         } else {
                             getPokemonList()
                         }
@@ -204,10 +189,9 @@ fun PokemonCard(
     pokemon: PokemonDetails,
     navController: NavController,
 ) {
-
     val typeName = pokemon.types.firstOrNull()?.type?.name
     val typeEnum = TypeColor.fromString(typeName)
-    val color = typeEnum?.color ?: Color.Gray
+    val color = typeEnum?.color ?: Color(0xFFA8A687)
 
     Card(
         modifier = Modifier
@@ -220,7 +204,7 @@ fun PokemonCard(
             Color.White,
             Color.White,
         ),
-        onClick = {navController.navigate("pokemon-details")}
+        onClick = {navController.navigate("pokemon-details/${pokemon.id}")}
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
